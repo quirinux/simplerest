@@ -16,13 +16,6 @@ driver = "oracle"
 location = "oracle://{{ .DBUSERNAME }}:{{ .DBPASSWORD }}@{{ .DBSERVER}}:1521/{{ .DBSERVICE }}"
 migrations = "./examples/migrations/oracle"
 
-[proxy]
-location = "/ords/restapi"
-backends = [
-  "ords.dev.gt.intranet.pags",
-  "ords.dev.tb.intranet.pags"
-]
-
 # CRUD routes
 [[resource]]
 location = "/todos"

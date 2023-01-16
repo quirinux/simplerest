@@ -16,13 +16,6 @@ driver = "sqlite3"
 location = "{{ .PWD }}/examples/todo.db"
 migrations = "./examples/migrations/sqlite3"
 
-[proxy]
-location = "/ords/restapi"
-backends = [
-  "ords.dev.gt.intranet.pags",
-  "ords.dev.tb.intranet.pags"
-]
-
 # CRUD routes
 [[resource]]
 location = "/todos"

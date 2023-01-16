@@ -16,13 +16,6 @@ driver = "mysql"
 location = "{{ .DBUSERNAME }}:{{ .DBPASSWORD }}@tcp({{ .DBSERVER }}:3306)/{{ .DBSERVICE }}?parseTime=true&charset=utf8"
 migrations = "./examples/migrations/mysql"
 
-[proxy]
-location = "/ords/restapi"
-backends = [
-  "ords.dev.gt.intranet.pags",
-  "ords.dev.tb.intranet.pags"
-]
-
 # CRUD routes
 [[resource]]
 location = "/todos"
