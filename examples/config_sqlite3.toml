@@ -1,0 +1,64 @@
+port = 8888
+scripts = "./examples/scripts"
+templates = "{{ .PWD }}/examples/templates"
+loglevel = "warning"
+#tlscert = "./examples/certificate/self-signed.crt"
+#tlskey = "./examples/certificate/self-signed.key"
+
+[static]
+location = "/assets"
+root = "./examples/assets"
+spa = "./examples/assets/index.html"
+
+## SQLite
+[database]
+driver = "sqlite3"
+location = "{{ .PWD }}/examples/todo.db"
+migrations = "./examples/migrations/sqlite3"
+
+[proxy]
+location = "/ords/restapi"
+backends = [
+  "ords.dev.gt.intranet.pags",
+  "ords.dev.tb.intranet.pags"
+]
+
+# CRUD routes
+[[resource]]
+location = "/todos"
+method = "GET"
+query = "select id, name, desc from todos"
+
+[[resource]]
+location = "/todos/:id"
+method = "GET"
+query = "select id, name, desc from todos where id = :id"
+render = "todo_get.mustache"
+
+[[resource]]
+location = "/todos"
+method = "POST"
+query = "insert into todos(name, desc) values(:name, :desc)"
+
+[[resource]]
+location = "/todos/:id"
+method = "PUT"
+query = "update todos set name = :name, desc = :desc where id = :id"
+
+[[resource]]
+location = "/todos/:id"
+method = "DELETE"
+query = "delete from todos where id = :id"
+
+
+# Erroring routes
+[[resource]]
+location = "/error/missing_table"
+method = "GET"
+query = "select id, name, desc from missing_table"
+
+
+[[resource]]
+location = "/error/missing_param"
+method = "GET"
+query = "select id, name, desc from missing_table where foo = :bar"

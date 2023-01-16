@@ -1,0 +1,92 @@
+port = 8888
+scripts = "./examples/scripts"
+templates = "{{ .PWD }}/examples/templates"
+loglevel = "warning"
+#tlscert = "./examples/certificate/self-signed.crt"
+#tlskey = "./examples/certificate/self-signed.key"
+secret = "3782cf21-8635-475b-8c18-97af3bd1f771"
+
+[static]
+location = "/assets"
+root = "./examples/assets"
+spa = "./examples/assets/index.html"
+
+# [[authentication]]
+# method = "htpasswd"
+# params.location = "./examples/htpasswd"
+
+[[authentication]]
+method = "dbtoken"
+params.driver = "sqlite3"
+params.location = ":memory:"
+params.query = "select username from tokens where token = :token"
+params.migrations = "./examples/migrations/sqlite3"
+
+[[authentication]]
+method = "ldap"
+# passing schema is mandatory, supported schemas are:
+# * ldap
+# * ldaps
+# * ldapi
+# * cladp, (RFC1798, deprecated but used by Active Directory)
+params.server = "ldap://{{ .LDAP_HOSTNAME }}"
+params.basedn = "{{ .LDAP_USERBASEDN }}"
+params.filter = "{{ .LDAP_ROLEBASEDN }}"
+# use timetout flag carefuly
+# yes, it has to be a string rather then an int
+params.timeout = "10"
+
+## SQLite in memory
+# be careful, this might brake on
+# busy environments
+[database]
+driver = "sqlite3"
+location = ":memory:"
+migrations = "./examples/migrations/sqlite3"
+
+[proxy]
+location = "/ords/restapi"
+backends = [
+  "ords.dev.gt.intranet.pags",
+  "ords.dev.tb.intranet.pags"
+]
+
+# CRUD routes
+[[resource]]
+location = "/todos"
+method = "GET"
+query = "select id, name, description from todos"
+
+[[resource]]
+location = "/todos/:id"
+method = "GET"
+query = "select id, name, description from todos where id = :id"
+render = "todo_get.mustache"
+
+[[resource]]
+location = "/todos"
+method = "POST"
+query = "insert into todos(name, description) values(:name, :description)"
+
+[[resource]]
+location = "/todos/:id"
+method = "PUT"
+query = "update todos set name = :name, description = :description where id = :id"
+
+[[resource]]
+location = "/todos/:id"
+method = "DELETE"
+query = "delete from todos where id = :id"
+
+
+# Erroring routes
+[[resource]]
+location = "/error/missing_table"
+method = "GET"
+query = "select id, name, description from missing_table"
+
+
+[[resource]]
+location = "/error/missing_param"
+method = "GET"
+query = "select id, name, description from missing_table where foo = :bar"

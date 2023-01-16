@@ -1,0 +1,114 @@
+port = 8888
+scripts = "./examples/scripts"
+templates = "{{ .PWD }}/examples/templates"
+loglevel = "warning"
+#tlscert = "./examples/certificate/self-signed.crt"
+#tlskey = "./examples/certificate/self-signed.key"
+
+[static]
+location = "/assets"
+root = "./examples/assets"
+spa = "./examples/assets/index.html"
+
+# Postgresql
+[database]
+driver = "pgx"
+location = "postgres://{{ .DBUSERNAME }}:{{ .DBPASSWORD }}@{{ .DBSERVER }}:5432/{{ .DBSERVICE }}"
+migrations = "./examples/migrations/postgres"
+
+[proxy]
+location = "/ords/restapi"
+backends = [
+  "ords.dev.gt.intranet.pags",
+  "ords.dev.tb.intranet.pags"
+]
+
+[[resource]]
+location = "/lists"
+method = "GET"
+query = "SELECT id, name, description FROM lists"
+
+[[resource]]
+location = "/lists/:id/todos"
+method = "GET"
+query = """
+  SELECT 
+    t.id todo_id, 
+    t.name todo_name, 
+    l.name list_name, 
+    t.description todo_description
+  FROM lists l
+    JOIN todos t ON t.list_id = l.id
+  WHERE l.id = :id
+"""
+
+[[resource]]
+location = "lists/:id/todos"
+method = "POST"
+query = "insert into todos(name, description, list_id) values(:name, :description, :id)"
+
+# CRUD routes
+[[resource]]
+location = "/todos"
+method = "GET"
+query = """
+  SELECT 
+    t.id, 
+    t.name, 
+    t.description, 
+    l.name list
+  FROM todos t
+    LEFT JOIN lists l ON t.list_id = l.id
+"""
+
+[[resource]]
+location = "/todos/:id"
+method = "GET"
+query = """
+  SELECT 
+    t.id, 
+    t.name, 
+    t.description, 
+    l.name list
+  FROM todos t
+    LEFT JOIN lists l ON t.list_id = l.id
+  WHERE t.id = :id
+"""
+render = "todo_get.mustache"
+
+[[resource]]
+location = "/todos"
+method = "POST"
+query = "insert into todos(name, description) values(:name, :description)"
+
+[[resource]]
+location = "/todos/:id"
+method = "PUT"
+query = "update todos set name = :name, description = :description where id = :id"
+
+[[resource]]
+location = "/todos/:id/:list_id"
+method = "PUT"
+query = "call transfer(:id, :list_id)"
+
+[[resource]]
+location = "/todos/:id"
+method = "DELETE"
+query = "delete from todos where id = :id"
+
+
+# Erroring routes
+[[resource]]
+location = "/error/missing_table"
+method = "GET"
+query = "select id, name from missing_table"
+
+[[resource]]
+location = "/error/missing_param"
+method = "GET"
+query = "select id, name from missing_table where foo = :bar"
+
+[[resource]]
+location = "/error/proc"
+method = "GET"
+query = "call raise_me()"
