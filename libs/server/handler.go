@@ -148,7 +148,7 @@ func (h *resourceHandler) exec(c *gin.Context) {
 		results["inserted_id"] = err
 	}
 
-	affectedRows, err := result.LastInsertId()
+	affectedRows, err := result.RowsAffected()
 	if err == nil {
 		results["affected_rows"] = affectedRows
 	} else {
