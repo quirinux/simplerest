@@ -3,10 +3,13 @@
 
 CONFIG := ./examples/config_sqlite3.toml
 GO := go
-MAIN := main.go
+GOFLAGS :=-race -v -tags=jsoniter 
+MAIN := cmd/simplerest.go
 BENCH := ./tests/benchmark.js
 DBVERSION := latest
 TOKEN := 467aa100-7883-4cbd-8152-b3478a0c3d0d
+BINS := $(wildcard cmd/*.go)
+BINDIR := bin
 
 define rundb
 	docker run -d \
@@ -17,8 +20,15 @@ define rundb
 		${1}:${DBVERSION}
 endef
 
+build: $(foreach f,$(BINS),$(BINDIR)/$(basename $(notdir $(f))))
+$(BINDIR)/%: cmd/%.go
+	${GO} build ${GOFLAGS} -o $@ $<
+
+clean:
+	rm -rdf $(BINDIR)
+
 run:
-	${GO} run -tags=jsoniter ${MAIN} --config ${CONFIG}
+	${GO} run ${GOFLAGS} ${MAIN} --config ${CONFIG}
 
 benchmark:
 	k6 run ${BENCH}

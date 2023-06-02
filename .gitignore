@@ -16,3 +16,4 @@
 .envrc
 trace.log
 examples/todo.db
+bin
