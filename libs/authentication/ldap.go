@@ -56,28 +56,42 @@ func (l *adLDAP) validate(c *gin.Context) (int, error) {
 		return http.StatusNetworkAuthenticationRequired, nil
 	}
 	fmt.Println(bindUsername, bindPassword)
-	fmt.Println(l.basedn, l.filter)
+	fmt.Println(l.basedn)
+	fmt.Println(fmt.Sprintf(l.filter, bindUsername))
 
 	ldap.DefaultTimeout = l.timeout
 	if conn, err = ldap.DialURL(l.server); err != nil {
 		return http.StatusInternalServerError, err
 	}
-	conn.Bind(bindUsername, bindPassword)
-	searchReq := ldap.NewSearchRequest(
-		l.basedn,
-		ldap.ScopeBaseObject, // you can also use ldap.ScopeWholeSubtree
-		ldap.NeverDerefAliases,
-		0,
-		0,
-		false,
-		l.filter,
-		[]string{},
-		nil,
-	)
-	result, err := conn.Search(searchReq)
+
+	// if err = conn.Bind(bindUsername, bindPassword); err != nil {
+	// 	return http.StatusUnauthorized, fmt.Errorf("Search Error: %s", err)
+	// }
+	// searchReq := ldap.NewSearchRequest(
+	// 	l.basedn,
+	// 	ldap.ScopeBaseObject,
+	// 	ldap.NeverDerefAliases,
+	// 	0,
+	// 	0,
+	// 	false,
+	// 	fmt.Sprintf(l.filter, bindUsername),
+	// 	[]string{},
+	// 	nil,
+	// )
+	// result, err := conn.Search(searchReq)
+	// if err != nil {
+	// 	return http.StatusUnauthorized, fmt.Errorf("Search Error: %s", err)
+	// }
+
+	controls := []ldap.Control{}
+	controls = append(controls, ldap.NewControlBeheraPasswordPolicy())
+	bindRequest := ldap.NewSimpleBindRequest("cn=admin,dc=example,dc=com", "password", controls)
+
+	result, err := conn.SimpleBind(bindRequest)
 	if err != nil {
 		return http.StatusUnauthorized, fmt.Errorf("Search Error: %s", err)
 	}
+
 	fmt.Println(result)
 	conn.Debug.Printf("foobar")
 
