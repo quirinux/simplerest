@@ -58,6 +58,10 @@ func (s *Server) Run() error {
 		})
 	}
 
+  if s.settings.Templates != "" {
+    r.LoadHTMLGlob(s.settings.Templates + "/**.*")
+  }
+
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", s.settings.Port),
 		Handler: r,

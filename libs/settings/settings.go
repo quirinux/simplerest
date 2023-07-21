@@ -29,7 +29,7 @@ type Resource struct {
 	Location string
 	Method   string
 	Query    string
-	Render   string
+	Template string
 }
 
 type Database struct {

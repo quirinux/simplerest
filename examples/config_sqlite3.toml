@@ -20,23 +20,23 @@ migrations = "./examples/migrations/sqlite3"
 [[resource]]
 location = "/todos"
 method = "GET"
-query = "select id, name, desc from todos"
+query = "select id, name, description from todos"
 
 [[resource]]
 location = "/todos/:id"
 method = "GET"
-query = "select id, name, desc from todos where id = :id"
+query = "select id, name, description from todos where id = :id"
 render = "todo_get.mustache"
 
 [[resource]]
 location = "/todos"
 method = "POST"
-query = "insert into todos(name, desc) values(:name, :desc)"
+query = "insert into todos(name, description) values(:name, :description)"
 
 [[resource]]
 location = "/todos/:id"
 method = "PUT"
-query = "update todos set name = :name, desc = :desc where id = :id"
+query = "update todos set name = :name, description = :description where id = :id"
 
 [[resource]]
 location = "/todos/:id"
@@ -48,10 +48,10 @@ query = "delete from todos where id = :id"
 [[resource]]
 location = "/error/missing_table"
 method = "GET"
-query = "select id, name, desc from missing_table"
+query = "select id, name, description from missing_table"
 
 
 [[resource]]
 location = "/error/missing_param"
 method = "GET"
-query = "select id, name, desc from missing_table where foo = :bar"
+query = "select id, name, description from missing_table where foo = :bar"

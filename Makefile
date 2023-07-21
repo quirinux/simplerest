@@ -10,6 +10,7 @@ DBVERSION := latest
 TOKEN := 467aa100-7883-4cbd-8152-b3478a0c3d0d
 BINS := $(wildcard cmd/*.go)
 BINDIR := bin
+VERBOSITY := -vvvvvvvv
 
 define rundb
 	docker run -d \
@@ -57,11 +58,18 @@ stopdb:
 	-docker rm database
 
 test:
-	http GET :8888/todos
-	http POST :8888/todos name=qui description=nux
-	http PUT :8888/todos/1 name=bar description=foo
-	http GET :8888/todos/1
-	http DELETE :8888/todos/5
-	http GET :8888/todos/5
-	http GET :8888/error/missing_table
-	http GET :8888/error/missing_param
+	http ${VERBOSITY} GET  :8888/todos
+	http ${VERBOSITY} POST :8888/todos name=qui description=nux
+	http ${VERBOSITY} PUT :8888/todos/1 name=bar description=foo
+	http ${VERBOSITY} GET :8888/todos/1
+	http ${VERBOSITY} DELETE :8888/todos/5
+	http ${VERBOSITY} GET :8888/todos/5
+	http ${VERBOSITY} GET :8888/error/missing_table
+	http ${VERBOSITY} GET :8888/error/missing_param
+	http ${VERBOSITY} GET  :8888/todos "Accept:application/x-yaml"
+	http ${VERBOSITY} GET  :8888/todos "Accept:text/yaml"
+	http ${VERBOSITY} GET  :8888/todos "Accept:application/xml"
+	http ${VERBOSITY} GET  :8888/todos "Accept:text/xml"
+	http ${VERBOSITY} GET  :8888/todos "Accept:application/toml"
+	http ${VERBOSITY} GET  :8888/todos "Accept:text/csv"
+	http ${VERBOSITY} GET  :8888/todos "Accept:text/html"

@@ -15,15 +15,8 @@ import (
 const (
 	maxInt                 = ^int64(0)
 	ContentTypeFormEncoded = "application/x-www-form-urlencoded"
-	ContentTypeJSON        = "application/json"
 	AcceptAny              = "*/*"
-	AcceptJSON             = "application/json"
-	AcceptTOML             = "application/toml"
-	AcceptTextTOML         = "text/toml"
-	AcceptYAML             = "application/yaml"
 	AcceptTextYAML         = "text/yaml"
-	AcceptXML              = "application/xml"
-	AcceptTextXML          = "text/xml"
 	AcceptCSV              = "text/csv"
 )
 
@@ -42,16 +35,18 @@ func (h *resourceHandler) failure(c *gin.Context, err error) {
 func (h *resourceHandler) success(c *gin.Context, data interface{}) {
 	accept := c.GetHeader("accept")
 	cb := c.JSON
-	if strings.Contains(accept, AcceptJSON) {
+	if strings.Contains(accept, gin.MIMEJSON) {
 		cb = c.JSON
-	} else if strings.Contains(accept, AcceptTOML) || strings.Contains(accept, AcceptTextTOML) {
+	} else if strings.Contains(accept, gin.MIMETOML) {
 		cb = c.TOML
-	} else if strings.Contains(accept, AcceptYAML) || strings.Contains(accept, AcceptTextYAML) {
+	} else if strings.Contains(accept, gin.MIMEYAML) || strings.Contains(accept, AcceptTextYAML) {
 		cb = c.YAML
-	} else if strings.Contains(accept, AcceptTOML) || strings.Contains(accept, AcceptTextTOML) {
+	} else if strings.Contains(accept, gin.MIMEXML) || strings.Contains(accept, gin.MIMEXML2) {
 		cb = c.XML
-	} else if strings.Contains(accept, AcceptXML) || strings.Contains(accept, AcceptTextXML) {
-		cb = c.XML
+	} else if strings.Contains(accept, gin.MIMEHTML) {
+		cb = func(code int, obj any){
+      c.HTML(code, h.res.Template, obj)
+    }
 	} else if strings.Contains(accept, AcceptCSV) {
 		cb = func(code int, obj any) {
 			c.Render(code, render.Data{
@@ -80,7 +75,7 @@ func (h *resourceHandler) params(c *gin.Context) gin.H {
 	}
 
 	// from request payload - whether it is a json
-	if strings.Contains(c.ContentType(), ContentTypeJSON) {
+	if strings.Contains(c.ContentType(), gin.MIMEJSON) {
 		if c.Request.Body != nil {
 			if data, err := io.ReadAll(c.Request.Body); err == nil {
 				var result map[string]interface{}
