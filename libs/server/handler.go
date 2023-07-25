@@ -10,6 +10,9 @@ import (
 	"net/http"
 	"simplerest/libs/settings"
 	"strings"
+  "html/template"
+  "bytes"
+  "encoding/csv"
 )
 
 const (
@@ -24,6 +27,82 @@ type resourceHandler struct {
 	res settings.Resource
 	db  *sqlx.DB
 }
+
+func (h *resourceHandler) htmlRender(c *gin.Context, code int, obj any) {
+  if h.res.Template != "" {
+    c.HTML(code, h.res.Template, obj)
+    return
+  }
+  const tpl = `
+  <table>
+  {{ $len := len .data }}
+  <thhead><tr>
+  {{ if gt $len 0 }}
+    {{ $header := index .data 0 }}
+    {{ range $k, $v := $header }}
+      <th>{{ $k }}</th>
+    {{ end }}
+  {{ end }}
+  </tr></thhead>
+  <tbody>
+  {{ range $k, $v := .data }}
+    <tr>
+    {{ range $k2, $v2 := $v }}
+      <td>{{ $v2 }}</td>
+    {{ end }}
+    </tr>
+  {{ end }}
+  </tbody>
+  </table>`
+  var err error
+  t, err := template.New("webpage").Parse(tpl)
+  if err != nil {
+    h.failure(c, err)
+    return
+  }
+  buf := bytes.NewBufferString("")
+  err = t.Execute(buf, obj)
+  if err != nil {
+    h.failure(c, err)
+    return
+  }
+  c.Render(code, render.Data{
+    ContentType: gin.MIMEHTML,
+    Data:        buf.Bytes(),
+  })
+}
+
+
+func (h *resourceHandler) csvRender(c *gin.Context, code int, obj any) {
+  var o gin.H = obj.(gin.H)
+  if len(o["data"].([]gin.H)) > 0 {
+    var records [][]string
+    data := o["data"].([]gin.H)
+    var header []string
+    for k, _ := range data[0] {
+      header = append(header, k)
+    }
+    records = append(records, header)
+    for _, v := range data {
+      var record []string
+      for _, idx := range header {
+        buf := bytes.NewBufferString("")
+        fmt.Fprint(buf, v[idx])
+        record = append(record, buf.String())
+      }
+      records = append(records, record)
+    }
+
+    buf := bytes.NewBufferString("")
+    csv.NewWriter(buf).WriteAll(records)
+
+    c.Render(code, render.Data{
+      ContentType: "text/csv",
+      Data:        buf.Bytes(),
+    })
+  }
+}
+
 
 func (h *resourceHandler) failure(c *gin.Context, err error) {
 	c.JSON(http.StatusInternalServerError, gin.H{
@@ -45,14 +124,11 @@ func (h *resourceHandler) success(c *gin.Context, data interface{}) {
 		cb = c.XML
 	} else if strings.Contains(accept, gin.MIMEHTML) {
 		cb = func(code int, obj any){
-      c.HTML(code, h.res.Template, obj)
+      h.htmlRender(c, code, obj)
     }
 	} else if strings.Contains(accept, AcceptCSV) {
 		cb = func(code int, obj any) {
-			c.Render(code, render.Data{
-				ContentType: "text/csv",
-				Data:        []byte("not implemented yet"),
-			})
+      h.csvRender(c, code, obj)
 		}
 	} else {
 		cb = c.JSON

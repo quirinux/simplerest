@@ -9,6 +9,7 @@ import (
 	"simplerest/libs/authentication"
 	"simplerest/libs/database"
 	"simplerest/libs/settings"
+  "path/filepath"
 )
 
 type Server struct {
@@ -59,7 +60,22 @@ func (s *Server) Run() error {
 	}
 
   if s.settings.Templates != "" {
-    r.LoadHTMLGlob(s.settings.Templates + "/**.*")
+    var files []string
+    err := filepath.Walk(s.settings.Templates, func(path string, info os.FileInfo, err error) error {
+      if err != nil {
+        return err
+      }
+
+      if !info.IsDir() {
+        files = append(files, path)
+      }
+      return nil
+    })
+    if err != nil {
+      fmt.Println(err)
+    }
+
+    r.LoadHTMLFiles(files...)
   }
 
 	server := &http.Server{
