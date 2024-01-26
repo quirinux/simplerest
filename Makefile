@@ -25,6 +25,8 @@ build: $(foreach f,$(BINS),$(BINDIR)/$(basename $(notdir $(f))))
 $(BINDIR)/%: cmd/%.go
 	${GO} build ${GOFLAGS} -o $@ $<
 
+rebuild: clean build
+
 clean:
 	rm -rdf $(BINDIR)
 

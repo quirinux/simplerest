@@ -22,19 +22,19 @@ params.location = ":memory:"
 params.query = "select username from tokens where token = :token"
 params.migrations = "./examples/migrations/sqlite3"
 
-# [[authentication]]
-# method = "ldap"
-# # passing schema is mandatory, supported schemas are:
-# # * ldap
-# # * ldaps
-# # * ldapi
-# # * cladp, (RFC1798, deprecated but used by Active Directory)
-# params.server = "ldap://{{ .LDAP_HOSTNAME }}"
-# params.basedn = "{{ .LDAP_USERBASEDN }}"
-# params.filter = "{{ .LDAP_ROLEBASEDN }}"
-# # use timetout flag carefuly
-# # yes, it has to be a string rather then an int
-# params.timeout = "10"
+[[authentication]]
+method = "ldap"
+# passing schema is mandatory, supported schemas are:
+# * ldap
+# * ldaps
+# * ldapi
+# * cladp, (RFC1798, deprecated but used by Active Directory)
+params.server = "ldap://{{ .LDAP_HOSTNAME }}"
+params.basedn = "{{ .LDAP_USERBASEDN }}"
+params.filter = "{{ .LDAP_ROLEBASEDN }}"
+# use timetout flag carefuly
+# yes, it has to be a string rather then an int
+params.timeout = "10"
 
 ## SQLite in memory
 # be careful, this might brake on

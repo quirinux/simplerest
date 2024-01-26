@@ -38,7 +38,10 @@ func New(s settings.Database) Database {
 
 func goodToGo(driver string) bool {
 	switch driver {
-	case DBDRiverMysql, DBDRiverOCI8, DBDRiverOracle, DBDRiverPGX, DBDRiverPSQL, DBDriverSQLite3:
+	case DBDRiverOracle:
+		sqlx.BindDriver("oracle", sqlx.NAMED)
+		return true
+	case DBDRiverMysql, DBDRiverOCI8, DBDRiverPGX, DBDRiverPSQL, DBDriverSQLite3:
 		return true
 	default:
 		return false
