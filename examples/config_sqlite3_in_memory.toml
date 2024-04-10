@@ -15,12 +15,12 @@ spa = "./examples/assets/index.html"
 # method = "htpasswd"
 # params.location = "./examples/htpasswd"
 
-[[authentication]]
-method = "dbtoken"
-params.driver = "sqlite3"
-params.location = ":memory:"
-params.query = "select username from tokens where token = :token"
-params.migrations = "./examples/migrations/sqlite3"
+# [[authentication]]
+# method = "dbtoken"
+# params.driver = "sqlite3"
+# params.location = ":memory:"
+# params.query = "select username from tokens where token = :token"
+# params.migrations = "./examples/migrations/sqlite3"
 
 # [[authentication]]
 # method = "ldap"
@@ -43,6 +43,11 @@ params.migrations = "./examples/migrations/sqlite3"
 driver = "sqlite3"
 location = ":memory:"
 migrations = "./examples/migrations/sqlite3"
+
+[[resource]]
+location = "/ping"
+method = "GET"
+query = "select 'pong'dual"
 
 # CRUD routes
 [[resource]]
