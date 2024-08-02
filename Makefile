@@ -1,9 +1,9 @@
 
 .ONESHELL:
 
-CONFIG := ./examples/config_sqlite3.toml
+CONFIG := ./examples/config_sqlite3_in_memory.toml
 GO := go
-GOFLAGS :=-race -v -tags=jsoniter 
+GOFLAGS := -v -tags=jsoniter 
 MAIN := cmd/simplerest.go
 BENCH := ./tests/benchmark.js
 DBVERSION := latest
@@ -31,7 +31,7 @@ clean:
 	rm -rdf $(BINDIR)
 
 run:
-	${GO} run ${GOFLAGS} ${MAIN} --config ${CONFIG}
+	${GO} run -race ${GOFLAGS} ${MAIN} --config ${CONFIG}
 
 benchmark:
 	k6 run ${BENCH}

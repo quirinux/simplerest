@@ -5,6 +5,7 @@ loglevel = "warning"
 #tlscert = "./examples/certificate/self-signed.crt"
 #tlskey = "./examples/certificate/self-signed.key"
 secret = "3782cf21-8635-475b-8c18-97af3bd1f771"
+working_dir = "{{ .PWD }}"
 
 [static]
 location = "/assets"
@@ -47,7 +48,7 @@ migrations = "./examples/migrations/sqlite3"
 [[resource]]
 location = "/ping"
 method = "GET"
-query = "select 'pong'dual"
+query = "select 'pong'"
 
 # CRUD routes
 [[resource]]
@@ -88,3 +89,9 @@ query = "select id, name, description from missing_table"
 location = "/error/missing_param"
 method = "GET"
 query = "select id, name, description from missing_table where foo = :bar"
+
+[[resource]]
+location = "/optional"
+method = "GET"
+query = "select :foo foo"
+params.foo = "bar"

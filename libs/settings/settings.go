@@ -30,6 +30,7 @@ type Resource struct {
 	Method   string
 	Query    string
 	Template string
+  Params   map[string]interface{}
 }
 
 type Database struct {
@@ -56,6 +57,7 @@ type Settings struct {
 	LogLevel       string
 	TLSCert        string
 	TLSKey         string
+  WorkingDir     string `toml:"working_dir"` 
 	Database       Database
 	Resources      []Resource `toml:"resource"`
 	Proxy          proxy
@@ -100,6 +102,7 @@ func (s *Settings) Display() {
 	fmt.Println("Templates:", s.Templates)
 	fmt.Println("TLS Certificate:", s.TLSCert)
 	fmt.Println("TLS Key:", s.TLSKey)
+	fmt.Println("WorkingDir:", s.WorkingDir)
 	fmt.Println("")
 	fmt.Println("Static settings")
 	fmt.Println("===============")

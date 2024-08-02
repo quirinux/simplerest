@@ -27,12 +27,20 @@ func New(s settings.Settings) Server {
 }
 
 func (s *Server) Initialize() error {
+  if s.settings.WorkingDir != "" {
+    if err := os.Chdir(s.settings.WorkingDir); err != nil {
+      return err
+    }
+  }
+
 	if err := s.db.Initialize(); err != nil {
 		return err
 	}
+
 	if err := s.auth.Initialize(); err != nil {
 		return err
 	}
+
 	return nil
 }
 

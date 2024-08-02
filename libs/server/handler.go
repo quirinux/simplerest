@@ -142,6 +142,10 @@ func (h *resourceHandler) success(c *gin.Context, data interface{}) {
 func (h *resourceHandler) params(c *gin.Context) gin.H {
 	params := gin.H{}
 
+  for k, v := range h.res.Params {
+    params[k] = v
+  }
+
 	// from request payload - whether it is a form
 	if strings.Contains(c.ContentType(), ContentTypeFormEncoded) {
 		c.Request.ParseMultipartForm(maxInt)
