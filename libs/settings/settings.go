@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/BurntSushi/toml"
+	"github.com/google/uuid"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
-
-	"github.com/BurntSushi/toml"
-	"github.com/google/uuid"
 )
 
 const (
@@ -30,7 +30,7 @@ type Resource struct {
 	Method   string
 	Query    string
 	Template string
-  Params   map[string]interface{}
+	Params   map[string]interface{}
 }
 
 type Database struct {
@@ -57,12 +57,13 @@ type Settings struct {
 	LogLevel       string
 	TLSCert        string
 	TLSKey         string
-  WorkingDir     string `toml:"working_dir"` 
+	workingDir     string
 	Database       Database
 	Resources      []Resource `toml:"resource"`
 	Proxy          proxy
 	Authentication []Authentication
 	Secret         string
+	config_file    string
 }
 
 func (s *Settings) validate() error {
@@ -97,12 +98,13 @@ func envToMap() map[string]string {
 func (s *Settings) Display() {
 	fmt.Println("Server settings")
 	fmt.Println("===============")
+	fmt.Println("WorkingDir:", s.workingDir)
+	fmt.Println("config file:", s.config_file)
 	fmt.Println("Port:", s.Port)
 	fmt.Println("Scripts:", s.Scripts)
 	fmt.Println("Templates:", s.Templates)
 	fmt.Println("TLS Certificate:", s.TLSCert)
 	fmt.Println("TLS Key:", s.TLSKey)
-	fmt.Println("WorkingDir:", s.WorkingDir)
 	fmt.Println("")
 	fmt.Println("Static settings")
 	fmt.Println("===============")
@@ -126,24 +128,29 @@ func (s *Settings) Display() {
 	}
 }
 
-func New() Settings {
+func New(full_file_path string) Settings {
+	pwd := filepath.Dir(full_file_path)
+	config_file := filepath.Base(full_file_path)
+
 	return Settings{
 		Port:      8080,
-		Scripts:   "/var/www/simplerest/scripts",
-		Templates: "/var/www/simplerest/templates",
+		Scripts:   filepath.Join(pwd, "scripts"),
+		Templates: filepath.Join(pwd, "templates"),
 		LogLevel:  "info",
 		Secret:    uuid.New().String(),
 		Static: Static{
-			Root: "/var/www/simplerest/statics",
+			Root: filepath.Join(pwd, "statics"),
 		},
+		workingDir:  pwd,
+		config_file: config_file,
 	}
 }
 
-func Parse(f string) (Settings, error) {
+func Parse(full_file_path string) (Settings, error) {
 	var config bytes.Buffer
-	s := New()
+	s := New(full_file_path)
 	envMap := envToMap()
-	tmpl, err := template.ParseFiles(f)
+	tmpl, err := template.ParseFiles(s.config_file)
 	if err != nil {
 		return s, err
 	}

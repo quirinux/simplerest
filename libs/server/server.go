@@ -6,10 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
+	"path/filepath"
 	"simplerest/libs/authentication"
 	"simplerest/libs/database"
 	"simplerest/libs/settings"
-  "path/filepath"
 )
 
 type Server struct {
@@ -27,12 +27,6 @@ func New(s settings.Settings) Server {
 }
 
 func (s *Server) Initialize() error {
-  if s.settings.WorkingDir != "" {
-    if err := os.Chdir(s.settings.WorkingDir); err != nil {
-      return err
-    }
-  }
-
 	if err := s.db.Initialize(); err != nil {
 		return err
 	}
@@ -67,24 +61,24 @@ func (s *Server) Run() error {
 		})
 	}
 
-  if s.settings.Templates != "" {
-    var files []string
-    err := filepath.Walk(s.settings.Templates, func(path string, info os.FileInfo, err error) error {
-      if err != nil {
-        return err
-      }
+	if s.settings.Templates != "" {
+		var files []string
+		err := filepath.Walk(s.settings.Templates, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
 
-      if !info.IsDir() {
-        files = append(files, path)
-      }
-      return nil
-    })
-    if err != nil {
-      fmt.Println(err)
-    }
+			if !info.IsDir() {
+				files = append(files, path)
+			}
+			return nil
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
 
-    r.LoadHTMLFiles(files...)
-  }
+		r.LoadHTMLFiles(files...)
+	}
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", s.settings.Port),

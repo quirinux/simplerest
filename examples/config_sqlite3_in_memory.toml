@@ -1,16 +1,15 @@
 port = 8888
-scripts = "./examples/scripts"
-templates = "{{ .PWD }}/examples/templates"
+scripts = "./scripts"
+templates = "./templates"
 loglevel = "warning"
 #tlscert = "./examples/certificate/self-signed.crt"
 #tlskey = "./examples/certificate/self-signed.key"
 secret = "3782cf21-8635-475b-8c18-97af3bd1f771"
-working_dir = "{{ .PWD }}"
 
 [static]
 location = "/assets"
-root = "./examples/assets"
-spa = "./examples/assets/index.html"
+root = "./assets"
+spa = "./assets/index.html"
 
 # [[authentication]]
 # method = "htpasswd"
@@ -43,7 +42,7 @@ spa = "./examples/assets/index.html"
 [database]
 driver = "sqlite3"
 location = ":memory:"
-migrations = "./examples/migrations/sqlite3"
+migrations = "./migrations/sqlite3"
 
 [[resource]]
 location = "/ping"
